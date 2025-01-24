@@ -1056,7 +1056,9 @@ const PDFViewerApplication = {
     // Set the necessary global worker parameters, using the available options.
     const workerParams = AppOptions.getAll(OptionKind.WORKER);
     Object.assign(GlobalWorkerOptions, workerParams);
-    console.log(GlobalWorkerOptions, workerParams)
+    console.log(GlobalWorkerOptions)
+    console.log(workerParams)
+    console.log(GlobalWorkerOptions)
     
     if (typeof PDFJSDev !== "undefined" && PDFJSDev.test("MOZCENTRAL")) {
       if (args.data && isPdfFile(args.filename)) {
