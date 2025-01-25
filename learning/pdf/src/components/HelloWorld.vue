@@ -18,6 +18,14 @@
 
       <div class="py-4" />
       <v-row>
+        <v-col cols="6">
+          <v-btn @click="toPage(-1)">前一页</v-btn>
+        </v-col>
+        <v-col cols="6">
+          <v-btn @click="toPage(1)">后一页</v-btn>
+        </v-col>
+      </v-row>
+      <v-row>
         <v-col cols="12">
           <canvas id="theCanvas"></canvas>
         </v-col>
@@ -160,6 +168,8 @@
 import * as pdfjsLib from "pdfjs-dist";
 import * as pdfWorker from "pdfjs-dist/build/pdf.worker.mjs"
 //import worker 
+const page = ref(1)
+let pdfDocument 
 onMounted(async () => {
   console.log("mounted")
   const pdfPath = "/src/assets/compressed.tracemonkey-pldi-09.pdf";
@@ -184,11 +194,40 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 "pdfjs-dist/build/pdf.worker.mjs";
 
 // Loading a document.
-//const loadingTask = pdfjsLib.getDocument(pdfPath);
-const loadingTask = pdfjsLib.getDocument({data: pdfData});
-const pdfDocument = await loadingTask.promise;
+const loadingTask = pdfjsLib.getDocument(pdfPath);
+//const loadingTask = pdfjsLib.getDocument({data: pdfData});
+//const pdfDocument = await loadingTask.promise;
+pdfDocument = await loadingTask.promise;
 // Request a first page
-const pdfPage = await pdfDocument.getPage(1);
+const pages = pdfDocument.numPages
+displayPage()
+// const pdfPage = await pdfDocument.getPage(page.value);
+// // Display page on the existing canvas with 100% scale.
+// const viewport = pdfPage.getViewport({ scale: 1.0 });
+// const canvas = document.getElementById("theCanvas");
+// canvas.width = viewport.width;
+// canvas.height = viewport.height;
+// const ctx = canvas.getContext("2d");
+// const renderTask = pdfPage.render({
+//   canvasContext: ctx,
+//   viewport,
+// });
+// await renderTask.promise;
+
+})
+async function toPage(delta) {
+  
+  if(delta === -1 && page.value > 1) {
+    page.value = page.value - 1
+  } 
+  if(delta === 1 && page.value < pdfDocument.numPages) {
+    page.value = page.value + 1
+  }
+  //console.log("toPage:", page.value, delta, pdfDocument.numPages)
+  await displayPage()
+}
+async function displayPage() {
+  const pdfPage = await pdfDocument.getPage(page.value);
 // Display page on the existing canvas with 100% scale.
 const viewport = pdfPage.getViewport({ scale: 1.0 });
 const canvas = document.getElementById("theCanvas");
@@ -200,6 +239,8 @@ const renderTask = pdfPage.render({
   viewport,
 });
 await renderTask.promise;
+  
+} 
 
-})
+
 </script>
