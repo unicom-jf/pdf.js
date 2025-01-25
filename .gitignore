@@ -7,13 +7,10 @@ Makefile
 node_modules/
 examples/node/svgdump/
 examples/node/pdf2png/*.png
-*.json
+
 *.ico
 
 learning/*.js
 .gitignore
-.editorconfig
-.browserslistrc
-eslint.config.js
 assets
-settings.scss
+
