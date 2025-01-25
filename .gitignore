@@ -8,9 +8,6 @@ node_modules/
 examples/node/svgdump/
 examples/node/pdf2png/*.png
 
-*.ico
-
-learning/*.js
 .gitignore
-assets
+
 
