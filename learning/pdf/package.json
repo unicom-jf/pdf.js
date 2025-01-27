@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "@mdi/font": "7.4.47",
+    "@types/pdfjs-dist": "^2.10.377",
     "core-js": "^3.37.1",
     "pdf": "file:",
     "pdfjs-dist": "^4.10.38",

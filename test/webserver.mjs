@@ -46,6 +46,7 @@ class WebServer {
   constructor({ root, host, port, cacheExpirationTime }) {
     const cwdURL = pathToFileURL(process.cwd()) + "/";
     this.rootURL = new URL(`${root || "."}/`, cwdURL);
+    console.log("rootURL:", this.rootURL);
     this.host = host || "localhost";
     this.port = port || 0;
     this.server = null;
@@ -194,10 +195,12 @@ class WebServer {
   }
 
   async #serveDirectoryIndex(response, url, localUrl) {
+    console.log("url:", url, localUrl);
     response.setHeader("Content-Type", "text/html");
     response.writeHead(200);
 
     if (url.searchParams.has("frame")) {
+      console.log("send frameset");
       response.end(
         `<html>
           <frameset cols=*,200>
@@ -217,7 +220,7 @@ class WebServer {
       response.end();
       return;
     }
-
+    console.log("send files");
     response.write(
       `<html>
          <head>

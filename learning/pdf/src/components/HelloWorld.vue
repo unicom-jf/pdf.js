@@ -1,14 +1,7 @@
 <template>
   <v-container class="fill-height">
-    <v-responsive
-      class="align-centerfill-height mx-auto"
-      max-width="900"
-    >
-      <v-img
-        class="mb-4"
-        height="150"
-        src="@/assets/logo.png"
-      />
+    <v-responsive class="align-centerfill-height mx-auto" max-width="900">
+      <v-img class="mb-4" height="150" src="@/assets/logo.png" />
 
       <div class="text-center">
         <div class="text-body-2 font-weight-light mb-n1">Welcome to</div>
@@ -18,11 +11,14 @@
 
       <div class="py-4" />
       <v-row>
-        <v-col cols="6">
+        <v-col cols="4">
           <v-btn @click="toPage(-1)">前一页</v-btn>
         </v-col>
-        <v-col cols="6">
+        <v-col cols="4">
           <v-btn @click="toPage(1)">后一页</v-btn>
+        </v-col>
+        <v-col cols="4">
+          <v-btn @click="doPaste">Paste</v-btn>
         </v-col>
       </v-row>
       <v-row>
@@ -50,7 +46,9 @@
 
             <template #subtitle>
               <div class="text-subtitle-1">
-                Replace this page by removing <v-kbd>{{ `<HelloWorld />` }}</v-kbd> in <v-kbd>pages/index.vue</v-kbd>.
+                Replace this page by removing
+                <v-kbd>{{ `<HelloWorld />` }}</v-kbd> in
+                <v-kbd>pages/index.vue</v-kbd>.
               </div>
             </template>
 
@@ -164,83 +162,93 @@
   </v-container>
 </template>
 
-<script setup>
+<script setup lang="ts">
 import * as pdfjsLib from "pdfjs-dist";
-import * as pdfWorker from "pdfjs-dist/build/pdf.worker.mjs"
-//import worker 
-const page = ref(1)
-let pdfDocument 
+//import * as pdfWorker from "pdfjs-dist/build/pdf.worker.mjs";
+// import { getDocument } from "pdfjs-dist/legacy/build/pdf.mjs";
+// import type { PDFDocumentProxy } from "pdfjs-dist/legacy/build/pdf.mjs";
+// import * as pdfjsLib from "pdfjs-dist/legacy/build/pdf.mjs";
+
+//import worker
+const page = ref(1);
+// let pdfDocument;
+let pdfDocument: pdfjsLib.PDFDocumentProxy;
 onMounted(async () => {
-  console.log("mounted")
+  console.log("mounted");
   const pdfPath = "/src/assets/compressed.tracemonkey-pldi-09.pdf";
   var pdfData = atob(
-    'JVBERi0xLjcKCjEgMCBvYmogICUgZW50cnkgcG9pbnQKPDwKICAvVHlwZSAvQ2F0YWxvZwog' +
-    'IC9QYWdlcyAyIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKICAvVHlwZSAvUGFnZXMKICAv' +
-    'TWVkaWFCb3ggWyAwIDAgMjAwIDIwMCBdCiAgL0NvdW50IDEKICAvS2lkcyBbIDMgMCBSIF0K' +
-    'Pj4KZW5kb2JqCgozIDAgb2JqCjw8CiAgL1R5cGUgL1BhZ2UKICAvUGFyZW50IDIgMCBSCiAg' +
-    'L1Jlc291cmNlcyA8PAogICAgL0ZvbnQgPDwKICAgICAgL0YxIDQgMCBSIAogICAgPj4KICA+' +
-    'PgogIC9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKCjQgMCBvYmoKPDwKICAvVHlwZSAvRm9u' +
-    'dAogIC9TdWJ0eXBlIC9UeXBlMQogIC9CYXNlRm9udCAvVGltZXMtUm9tYW4KPj4KZW5kb2Jq' +
-    'Cgo1IDAgb2JqICAlIHBhZ2UgY29udGVudAo8PAogIC9MZW5ndGggNDQKPj4Kc3RyZWFtCkJU' +
-    'CjcwIDUwIFRECi9GMSAxMiBUZgooSGVsbG8sIHdvcmxkISkgVGoKRVQKZW5kc3RyZWFtCmVu' +
-    'ZG9iagoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4g' +
-    'CjAwMDAwMDAwNzkgMDAwMDAgbiAKMDAwMDAwMDE3MyAwMDAwMCBuIAowMDAwMDAwMzAxIDAw' +
-    'MDAwIG4gCjAwMDAwMDAzODAgMDAwMDAgbiAKdHJhaWxlcgo8PAogIC9TaXplIDYKICAvUm9v' +
-    'dCAxIDAgUgo+PgpzdGFydHhyZWYKNDkyCiUlRU9G');
+    "JVBERi0xLjcKCjEgMCBvYmogICUgZW50cnkgcG9pbnQKPDwKICAvVHlwZSAvQ2F0YWxvZwog" +
+      "IC9QYWdlcyAyIDAgUgo+PgplbmRvYmoKCjIgMCBvYmoKPDwKICAvVHlwZSAvUGFnZXMKICAv" +
+      "TWVkaWFCb3ggWyAwIDAgMjAwIDIwMCBdCiAgL0NvdW50IDEKICAvS2lkcyBbIDMgMCBSIF0K" +
+      "Pj4KZW5kb2JqCgozIDAgb2JqCjw8CiAgL1R5cGUgL1BhZ2UKICAvUGFyZW50IDIgMCBSCiAg" +
+      "L1Jlc291cmNlcyA8PAogICAgL0ZvbnQgPDwKICAgICAgL0YxIDQgMCBSIAogICAgPj4KICA+" +
+      "PgogIC9Db250ZW50cyA1IDAgUgo+PgplbmRvYmoKCjQgMCBvYmoKPDwKICAvVHlwZSAvRm9u" +
+      "dAogIC9TdWJ0eXBlIC9UeXBlMQogIC9CYXNlRm9udCAvVGltZXMtUm9tYW4KPj4KZW5kb2Jq" +
+      "Cgo1IDAgb2JqICAlIHBhZ2UgY29udGVudAo8PAogIC9MZW5ndGggNDQKPj4Kc3RyZWFtCkJU" +
+      "CjcwIDUwIFRECi9GMSAxMiBUZgooSGVsbG8sIHdvcmxkISkgVGoKRVQKZW5kc3RyZWFtCmVu" +
+      "ZG9iagoKeHJlZgowIDYKMDAwMDAwMDAwMCA2NTUzNSBmIAowMDAwMDAwMDEwIDAwMDAwIG4g" +
+      "CjAwMDAwMDAwNzkgMDAwMDAgbiAKMDAwMDAwMDE3MyAwMDAwMCBuIAowMDAwMDAwMzAxIDAw" +
+      "MDAwIG4gCjAwMDAwMDAzODAgMDAwMDAgbiAKdHJhaWxlcgo8PAogIC9TaXplIDYKICAvUm9v" +
+      "dCAxIDAgUgo+PgpzdGFydHhyZWYKNDkyCiUlRU9G"
+  );
 
-// Setting worker path to worker bundle.
-  //const worker = import("pdfjs-dist/build/pdf.worker.mjs")
-pdfjsLib.GlobalWorkerOptions.workerSrc =
-"pdfjs-dist/build/pdf.worker.mjs";
+  // Setting worker path to worker bundle.
+  //const worker = import("pdfjs-dist/build/pdf.worker.mjs");
+  import("pdfjs-dist/build/pdf.worker.mjs");
+  pdfjsLib.GlobalWorkerOptions.workerSrc = "pdfjs-dist/build/pdf.worker.mjs";
 
-// Loading a document.
-const loadingTask = pdfjsLib.getDocument(pdfPath);
-//const loadingTask = pdfjsLib.getDocument({data: pdfData});
-//const pdfDocument = await loadingTask.promise;
-pdfDocument = await loadingTask.promise;
-// Request a first page
-const pages = pdfDocument.numPages
-displayPage()
-// const pdfPage = await pdfDocument.getPage(page.value);
-// // Display page on the existing canvas with 100% scale.
-// const viewport = pdfPage.getViewport({ scale: 1.0 });
-// const canvas = document.getElementById("theCanvas");
-// canvas.width = viewport.width;
-// canvas.height = viewport.height;
-// const ctx = canvas.getContext("2d");
-// const renderTask = pdfPage.render({
-//   canvasContext: ctx,
-//   viewport,
-// });
-// await renderTask.promise;
-
-})
+  // Loading a document.
+  const loadingTask = pdfjsLib.getDocument(pdfPath);
+  // const loadingTask = getDocument(pdfPath);
+  //const loadingTask = pdfjsLib.getDocument({data: pdfData});
+  //const pdfDocument = await loadingTask.promise;
+  pdfDocument = await loadingTask.promise;
+  // Request a first page
+  const pages = pdfDocument.numPages;
+  displayPage();
+  // const pdfPage = await pdfDocument.getPage(page.value);
+  // // Display page on the existing canvas with 100% scale.
+  // const viewport = pdfPage.getViewport({ scale: 1.0 });
+  // const canvas = document.getElementById("theCanvas");
+  // canvas.width = viewport.width;
+  // canvas.height = viewport.height;
+  // const ctx = canvas.getContext("2d");
+  // const renderTask = pdfPage.render({
+  //   canvasContext: ctx,
+  //   viewport,
+  // });
+  // await renderTask.promise;
+});
 async function toPage(delta) {
-  
-  if(delta === -1 && page.value > 1) {
-    page.value = page.value - 1
-  } 
-  if(delta === 1 && page.value < pdfDocument.numPages) {
-    page.value = page.value + 1
+  if (delta === -1 && page.value > 1) {
+    page.value = page.value - 1;
+  }
+  if (delta === 1 && page.value < pdfDocument.numPages) {
+    page.value = page.value + 1;
   }
   //console.log("toPage:", page.value, delta, pdfDocument.numPages)
-  await displayPage()
+  await displayPage();
 }
 async function displayPage() {
   const pdfPage = await pdfDocument.getPage(page.value);
-// Display page on the existing canvas with 100% scale.
-const viewport = pdfPage.getViewport({ scale: 1.0 });
-const canvas = document.getElementById("theCanvas");
-canvas.width = viewport.width;
-canvas.height = viewport.height;
-const ctx = canvas.getContext("2d");
-const renderTask = pdfPage.render({
-  canvasContext: ctx,
-  viewport,
-});
-await renderTask.promise;
-  
-} 
-
-
+  // Display page on the existing canvas with 100% scale.
+  const viewport = pdfPage.getViewport({ scale: 1.0 });
+  const canvas = document.getElementById("theCanvas");
+  canvas.width = viewport.width;
+  canvas.height = viewport.height;
+  const ctx = canvas.getContext("2d");
+  const renderTask = pdfPage.render({
+    canvasContext: ctx,
+    viewport,
+  });
+  await renderTask.promise;
+}
+async function doPaste() {
+  try {
+    await navigator.clipboard.writeText("navigator.clipboard.writeTextV2");
+    console.log("pasted to clipboard");
+  } catch (error) {
+    console.error(error.message);
+  }
+}
 </script>
